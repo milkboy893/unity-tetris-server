@@ -8,7 +8,6 @@ import java.util.List;
 @RequestMapping("/api/scores")
 @CrossOrigin(origins = "*")
 public class ScoreController {
-
     @Autowired
     private ScoreRepository repository;
 
