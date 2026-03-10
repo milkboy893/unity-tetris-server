@@ -1,23 +1,33 @@
-package com.example.demo;
+package com.example.tetris.entity;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import java.util.List;
+@Entity
+@Table(name = "scores")
+public class Score {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-@RestController
-@RequestMapping("/api/scores")
-@CrossOrigin(origins = "*")
-public class ScoreController {
-    @Autowired
-    private ScoreRepository repository;
+    // Playerテーブルと「多対1」で紐付ける
+    @ManyToOne
+    @JoinColumn(name = "player_id", nullable = false)
+    private Player player;
 
-    @GetMapping
-    public List<Score> getTopScores() {
-        return repository.findTop5ByOrderByScoreDesc();
-    }
+    @Column(nullable = false)
+    private int score;
 
-    @PostMapping
-    public Score addScore(@RequestBody Score score) {
-        return repository.save(score);
-    }
+    // いつプレイしたかの日時も自動で記録しておく
+    @Column(name = "played_at")
+    private LocalDateTime playedAt = LocalDateTime.now();
+
+    // Getter & Setter
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public Player getPlayer() { return player; }
+    public void setPlayer(Player player) { this.player = player; }
+    public int getScore() { return score; }
+    public void setScore(int score) { this.score = score; }
+    public LocalDateTime getPlayedAt() { return playedAt; }
+    public void setPlayedAt(LocalDateTime playedAt) { this.playedAt = playedAt; }
 }

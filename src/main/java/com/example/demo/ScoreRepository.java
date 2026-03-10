@@ -1,10 +1,12 @@
-package com.example.demo;
-
+package com.example.tetris.repository;
+import com.example.tetris.entity.Score;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 import java.util.List;
 
-@Repository
 public interface ScoreRepository extends JpaRepository<Score, Long> {
-    List<Score> findTop5ByOrderByScoreDesc();
+    // 個人のハイスコア履歴用（プレイヤーIDで絞り込み、スコアの降順で取得）
+    List<Score> findByPlayerIdOrderByScoreDesc(Long playerId);
+
+    // 全体ランキング用（無条件でスコアの降順トップ10を取得）
+    List<Score> findTop10ByOrderByScoreDesc();
 }
