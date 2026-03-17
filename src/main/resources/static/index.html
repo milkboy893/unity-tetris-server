@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TETRIS OFFICIAL RANKING</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+JP:wght@700&display=swap" rel="stylesheet">
+    <style>
+        /* 全体のベース設定（ダークテーマ） */
+        body {
+            font-family: 'Press Start 2P', 'Noto Sans JP', sans-serif;
+            background-color: #111;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px; /* 背景をうっすらグリッド模様に */
+            color: #fff;
+            text-align: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+
+        /* タイトルロゴのネオンエフェクト */
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            color: #fff;
+            text-shadow:
+                0 0 5px #fff, 0 0 10px #fff, 0 0 20px #0ff,
+                0 0 40px #0ff, 0 0 80px #0ff;
+            animation: pulsate 1.5s infinite alternate;
+        }
+
+        @keyframes pulsate {
+            100% { text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #0ff, 0 0 40px #0ff, 0 0 80px #0ff; }
+            0% { text-shadow: 0 0 2px #fff, 0 0 4px #fff, 0 0 6px #0ff, 0 0 10px #0ff, 0 0 20px #0ff; }
+        }
+
+        /* メインのボード画面 */
+        .board-container {
+            background-color: rgba(0, 0, 0, 0.8);
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 30px;
+            border: 4px solid #333;
+            border-radius: 8px;
+            box-shadow: inset 0 0 20px #000, 0 10px 30px rgba(0,0,0,0.8);
+            position: relative;
+        }
+
+        /* 検索バーのエリア */
+        .search-area {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        input[type="text"] {
+            font-family: 'Press Start 2P', 'Noto Sans JP', sans-serif;
+            padding: 12px;
+            font-size: 1rem;
+            background-color: #222;
+            color: #fff;
+            border: 2px solid #555;
+            border-radius: 4px;
+            width: 60%;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: #f1c40f;
+        }
+
+        button {
+            font-family: 'Press Start 2P', 'Noto Sans JP', sans-serif;
+            padding: 12px 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            box-shadow: 0 4px 0 #c0392b;
+            transition: all 0.1s;
+        }
+
+        button:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #c0392b;
+        }
+
+        button.btn-blue { background-color: #3498db; box-shadow: 0 4px 0 #2980b9; }
+        button.btn-blue:active { box-shadow: 0 0 0 #2980b9; }
+
+        /* ランキングリストのデザイン */
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 10px;
+            border-bottom: 2px dashed #444;
+            font-size: 1.1rem;
+            align-items: center;
+            animation: slideIn 0.3s ease-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        li:last-child { border-bottom: none; }
+
+        .rank { width: 50px; text-align: left; color: #aaa; }
+        .name { flex-grow: 1; text-align: left; }
+        .score { font-weight: bold; }
+
+        /* 上位3名の特別カラー（テトリス風の色合い） */
+        li.rank-1 .rank { color: #f1c40f; text-shadow: 0 0 10px #f1c40f; } /* 黄色(Oミノ) */
+        li.rank-2 .rank { color: #bdc3c7; text-shadow: 0 0 10px #bdc3c7; } /* シルバー */
+        li.rank-3 .rank { color: #d35400; text-shadow: 0 0 10px #d35400; } /* 銅・オレンジ(Lミノ) */
+        li.rank-1 .score { color: #00ffff; } /* 水色(Iミノ) */
+        li.rank-2 .score { color: #9b59b6; } /* 紫(Tミノ) */
+        li.rank-3 .score { color: #2ecc71; } /* 緑(Sミノ) */
+
+        /* 戦績（STATS）画面のデザイン */
+        .stats-container {
+            display: none; /* 初期状態は隠す */
+            text-align: left;
+            background-color: #222;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #3498db;
+        }
+        .stats-container h2 { color: #3498db; font-size: 1.2rem; text-align: center; border-bottom: 2px solid #3498db; padding-bottom: 10px;}
+        .stat-row { margin: 15px 0; font-size: 1rem; color: #fff; display: flex; justify-content: space-between;}
+        .stat-label { color: #aaa; }
+        .stat-value { color: #f1c40f; }
+        .history-title { margin-top: 25px; font-size: 0.9rem; color: #aaa; text-align: center;}
+
+        .error-msg { color: #e74c3c; padding: 20px; font-size: 1rem; }
+    </style>
+</head>
+<body>
+
+    <h1>TETRIS RANKING</h1>
+
+    <div class="board-container">
+        <div class="search-area">
+            <input type="text" id="searchInput" placeholder="PLAYER NAME">
+            <button onclick="searchStats()">STATS</button>
+            <button class="btn-blue" onclick="showRanking()">RANKING</button>
+        </div>
+
+        <div id="ranking-section">
+            <ul id="ranking-list">
+                <li style="justify-content: center; color: #00ffff; animation: pulsate 1s infinite alternate;">LOADING...</li>
+            </ul>
+        </div>
+
+        <div id="stats-section" class="stats-container">
+            <h2 id="stats-name">PLAYER</h2>
+            <div class="stat-row">
+                <span class="stat-label">PLAY COUNT</span>
+                <span class="stat-value" id="stats-playcount">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">HIGH SCORE</span>
+                <span class="stat-value" id="stats-highscore">0</span>
+            </div>
+            <div class="history-title">- RECENT HISTORY -</div>
+            <ul id="stats-history-list">
+                </ul>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = "https://unity-tetris-server.onrender.com/api";
+
+        // HTMLの要素を取得
+        const rankingSection = document.getElementById("ranking-section");
+        const statsSection = document.getElementById("stats-section");
+        const rankingList = document.getElementById("ranking-list");
+
+        // --- ランキングを取得して表示する処理 ---
+        async function fetchRanking() {
+            try {
+                rankingList.innerHTML = '<li style="justify-content: center; color: #00ffff;">LOADING...</li>';
+
+                const response = await fetch(`${API_BASE_URL}/scores`);
+                if (!response.ok) throw new Error("Network Error");
+
+                const scores = await response.json();
+                rankingList.innerHTML = "";
+
+                if (scores.length === 0) {
+                    rankingList.innerHTML = "<li style='justify-content: center;'>NO DATA</li>";
+                    return;
+                }
+
+                scores.forEach((data, index) => {
+                    const li = document.createElement("li");
+                    // アニメーションを少しずつ遅らせて表示する小技
+                    li.style.animationDelay = `${index * 0.1}s`;
+
+                    // 1〜3位には特別なCSSクラスを付ける
+                    if (index < 3) li.className = `rank-${index + 1}`;
+
+                    li.innerHTML = `
+                        <span class="rank">${index + 1}</span>
+                        <span class="name">${data.name}</span>
+                        <span class="score">${data.score}</span>
+                    `;
+                    rankingList.appendChild(li);
+                });
+
+            } catch (error) {
+                rankingList.innerHTML = '<li class="error-msg">ERROR: Could not load ranking</li>';
+            }
+        }
+
+        // --- 個人の戦績を検索して表示する処理 ---
+        async function searchStats() {
+            const inputName = document.getElementById("searchInput").value.trim();
+            if (!inputName) {
+                alert("名前を入力してください！");
+                return;
+            }
+
+            // 画面を戦績モードに切り替え
+            rankingSection.style.display = "none";
+            statsSection.style.display = "block";
+
+            document.getElementById("stats-name").textContent = "LOADING...";
+            document.getElementById("stats-playcount").textContent = "-";
+            document.getElementById("stats-highscore").textContent = "-";
+            document.getElementById("stats-history-list").innerHTML = "";
+
+            try {
+                // Unity側と同じAPIを叩く
+                const response = await fetch(`${API_BASE_URL}/players/${encodeURIComponent(inputName)}/stats`);
+
+                // 404エラー（名前がない）の処理
+                if (response.status === 404) {
+                    document.getElementById("stats-name").textContent = "NOT FOUND";
+                    document.getElementById("stats-history-list").innerHTML = '<li class="error-msg" style="justify-content: center;">プレイヤーが見つかりません</li>';
+                    return;
+                }
+                if (!response.ok) throw new Error("Network Error");
+
+                const stats = await response.json();
+
+                // データを画面にセット
+                document.getElementById("stats-name").textContent = stats.name;
+                document.getElementById("stats-playcount").textContent = stats.playCount;
+                document.getElementById("stats-highscore").textContent = stats.highScore;
+
+                // 履歴リストを作成
+                const historyList = document.getElementById("stats-history-list");
+                if (stats.history && stats.history.length > 0) {
+                    stats.history.forEach((score, index) => {
+                        const li = document.createElement("li");
+                        li.style.animationDelay = `${index * 0.1}s`;
+                        li.innerHTML = `<span class="rank">${index + 1}</span><span class="score" style="color: #fff;">${score}</span>`;
+                        historyList.appendChild(li);
+                    });
+                } else {
+                    historyList.innerHTML = "<li style='justify-content: center;'>履歴がありません</li>";
+                }
+
+            } catch (error) {
+                document.getElementById("stats-name").textContent = "ERROR";
+                document.getElementById("stats-history-list").innerHTML = '<li class="error-msg">データの取得に失敗しました</li>';
+            }
+        }
+
+        // --- ランキング画面に戻る処理 ---
+        function showRanking() {
+            statsSection.style.display = "none";
+            rankingSection.style.display = "block";
+            fetchRanking(); // 戻るたびに最新のランキングを取り直す
+        }
+
+        // ページ読み込み時にまずはランキングを表示
+        fetchRanking();
+    </script>
+</body>
+</html>
